@@ -123,6 +123,30 @@ func (c *Client) Request(ra RequestAction) (map[string]interface{}, error) {
 	return response, nil
 }
 
+func (c *Client) Login() (map[string]interface{}, error) {
+	request := RequestAction{
+		Action: "login",
+		Params: map[string]interface{}{
+			"username": c.Config.Username,
+			"password": c.Config.Password,
+		},
+	}
+	return c.Request(request)
+}
+
+func (c *Client) Logout() (map[string]interface{}, error) {
+	request := RequestAction{
+		Action: "logout",
+		Params: map[string]interface{}{},
+	}
+	response, err := c.Request(request)
+	if err != nil {
+		session := CreateSession()
+		c.Session = *session
+	}
+	return response, err
+}
+
 func (c *Client) GetSessionData() (map[string]interface{}, error) {
 	request := RequestAction{
 		Action: "get_session_data",
