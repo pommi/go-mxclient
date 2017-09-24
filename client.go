@@ -8,10 +8,12 @@ import (
 	"github.com/google/uuid"
 	"io/ioutil"
 	"net/http"
+	"net/http/cookiejar"
 )
 
 type Client struct {
-	Config Config
+	Config  Config
+	Session Session
 }
 
 type Config struct {
@@ -29,6 +31,19 @@ func DefaultConfig() *Config {
 		Password:  "",
 		Anonymous: false,
 		UserAgent: "Go-MxClient/0.1",
+	}
+}
+
+type Session struct {
+	HttpClient *http.Client
+}
+
+func CreateSession() *Session {
+	jar, _ := cookiejar.New(nil)
+	return &Session{
+		HttpClient: &http.Client{
+			Jar: jar,
+		},
 	}
 }
 
@@ -52,11 +67,10 @@ func NewClient(config *Config) (client *Client, err error) {
 		config.UserAgent = defConfig.UserAgent
 	}
 
-	if err != nil {
-		return nil, err
-	}
+	session := CreateSession()
 	client = &Client{
-		Config: *config,
+		Config:  *config,
+		Session: *session,
 	}
 	return client, nil
 }
@@ -79,8 +93,7 @@ func (c *Client) Request(ra RequestAction) (map[string]interface{}, error) {
 	request_id, _ := uuid.NewRandom()
 	req.Header.Set("X-Mx-ReqToken", request_id.String())
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := c.Session.HttpClient.Do(req)
 	if err != nil {
 		panic(err)
 	}
