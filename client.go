@@ -129,6 +129,7 @@ func (c *Client) GetSessionData() (map[string]interface{}, error) {
 		Params: map[string]interface{}{
 			"profile":        "",
 			"timezoneoffset": 0,
+			"hybrid":         false,
 		},
 	}
 	return c.Request(request)
