@@ -36,6 +36,7 @@ func DefaultConfig() *Config {
 
 type Session struct {
 	HttpClient *http.Client
+	CsrfToken  string
 }
 
 func CreateSession() *Session {
@@ -44,6 +45,7 @@ func CreateSession() *Session {
 		HttpClient: &http.Client{
 			Jar: jar,
 		},
+		CsrfToken: "",
 	}
 }
 
@@ -92,6 +94,9 @@ func (c *Client) Request(ra RequestAction) (map[string]interface{}, error) {
 
 	request_id, _ := uuid.NewRandom()
 	req.Header.Set("X-Mx-ReqToken", request_id.String())
+	if c.Session.CsrfToken != "" {
+		req.Header.Set("X-Csrf-Token", c.Session.CsrfToken)
+	}
 
 	resp, err := c.Session.HttpClient.Do(req)
 	if err != nil {
@@ -107,6 +112,10 @@ func (c *Client) Request(ra RequestAction) (map[string]interface{}, error) {
 
 	var response map[string]interface{}
 	json.Unmarshal(body, &response)
+
+	if csrf, ok := response["csrftoken"]; ok {
+		c.Session.CsrfToken = csrf.(string)
+	}
 
 	if resp.StatusCode != 200 {
 		return response, errors.New(fmt.Sprintf("Received HTTP response: %s", resp.Status))
