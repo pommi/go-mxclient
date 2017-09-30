@@ -20,7 +20,6 @@ type Config struct {
 	Url       string `json:"url"`
 	Username  string `json:"username"`
 	Password  string `json:"password"`
-	Anonymous bool   `json:"anonymous"`
 	UserAgent string `json:"user_agent"`
 }
 
@@ -29,7 +28,6 @@ func DefaultConfig() *Config {
 		Url:       "",
 		Username:  "",
 		Password:  "",
-		Anonymous: false,
 		UserAgent: "Go-MxClient/0.1",
 	}
 }
