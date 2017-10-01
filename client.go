@@ -156,3 +156,22 @@ func (c *Client) GetSessionData() (map[string]interface{}, error) {
 	}
 	return c.Request(request)
 }
+
+func (c *Client) RetrieveByXPath(xpath string, amount int, offset int) (map[string]interface{}, error) {
+	request := RequestAction{
+		Action: "retrieve_by_xpath",
+		Params: map[string]interface{}{
+			"xpath": xpath,
+			"schema": map[string]interface{}{
+				"amount": amount,
+				"offset": offset,
+			},
+		},
+	}
+	return c.Request(request)
+}
+
+func (c *Client) GetObjectsByXPath(xpath string, amount int, offset int) ([]MxObject, error) {
+	result, err := c.RetrieveByXPath(xpath, amount, offset)
+	return parseMxObjects(result), err
+}
